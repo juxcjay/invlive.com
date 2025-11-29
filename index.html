@@ -826,7 +826,6 @@
     footer a:hover {
       text-decoration: underline;
     }
-
   </style>
 </head>
 <body>
@@ -845,7 +844,7 @@
       <nav class="nav-links">
         <a href="#features">Features</a>
         <a href="#how-it-works">How it works</a>
-        <a href="#pricing">Plans</a>
+        <a href="#client-area">Client area</a>
         <a href="#faq">FAQ</a>
       </nav>
 
@@ -854,10 +853,7 @@
           <span class="status-dot"></span>
           Live waitlist now open
         </div>
-        <a
-          class="btn btn-primary"
-          href="#cta"
-        >
+        <a class="btn btn-primary" href="#cta">
           Get early access <span class="btn-icon">→</span>
         </a>
       </div>
@@ -1187,6 +1183,96 @@
         </div>
       </section>
 
+      <!-- CLIENT SELF-SERVICE SECTION -->
+      <section id="client-area">
+        <div class="section-label">Client area</div>
+        <h2 class="section-title">Invest on your own, in 3 simple steps.</h2>
+        <p class="section-subtitle">
+          Use the instructions below to fund your account via Bitcoin without waiting
+          for manual chat replies. After payment, you’ll get a confirmation from the InvLive team.
+        </p>
+
+        <div class="stats-row">
+          <!-- Left: steps -->
+          <div>
+            <article class="step-card">
+              <div class="step-number">1</div>
+              <div>
+                <div class="step-title">Copy the InvLive BTC address</div>
+                <p class="step-text">
+                  Send only Bitcoin (BTC) on the Bitcoin network. Do not send USDT or any
+                  other coin to this address.
+                </p>
+              </div>
+            </article>
+
+            <article class="step-card">
+              <div class="step-number">2</div>
+              <div>
+                <div class="step-title">Send your chosen amount</div>
+                <p class="step-text">
+                  You can send from any wallet or exchange. Make sure network fee
+                  is included so the full amount arrives.
+                </p>
+              </div>
+            </article>
+
+            <article class="step-card">
+              <div class="step-number">3</div>
+              <div>
+                <div class="step-title">Submit proof of payment</div>
+                <p class="step-text">
+                  After sending, take a screenshot or copy the transaction hash and send it
+                  to us on WhatsApp or email so we can credit your InvLive account.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <!-- Right: BTC address card -->
+          <div class="stat-card" style="border-radius: 20px;">
+            <div class="stat-label">Official InvLive BTC deposit address</div>
+
+            <div
+              id="btc-address"
+              class="stat-value"
+              style="font-size: 13px; word-break: break-all; margin-top: 4px;"
+            >
+              3JSBrUPnaY5xRR6RUFqcwfMbQm5J4hvvdQ
+            </div>
+
+            <!-- QR CODE -->
+            <div style="margin-top: 10px; display: flex; justify-content: center;">
+              <img
+                src="assets/btc-qr.png"
+                alt="InvLive BTC deposit QR code"
+                style="width: 130px; height: 130px; border-radius: 16px; background: #0f172a; padding: 6px;"
+              />
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              style="margin-top: 10px; padding-inline: 14px; font-size: 12px;"
+              onclick="copyBTC()"
+            >
+              Copy BTC address
+            </button>
+
+            <p style="font-size: 11px; color: var(--text-dim); margin-top: 10px;">
+              ⚠️ Send only BTC on the Bitcoin network. Deposits to the wrong network
+              cannot be recovered.
+            </p>
+
+            <p style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">
+              After payment, share your proof via:<br />
+              – WhatsApp: +1 (501) 310-8294<br />
+              – Email: Invlive81@gmail.com
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- CTA -->
       <section id="cta" class="cta">
         <div>
@@ -1228,6 +1314,30 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    function copyBTC() {
+      var el = document.getElementById("btc-address");
+      if (!el) return;
+
+      var text = el.textContent.trim();
+
+      if (!navigator.clipboard) {
+        var temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(temp);
+      } else {
+        navigator.clipboard.writeText(text).catch(function () { });
+      }
+
+      var oldText = el.textContent;
+      el.textContent = "Copied!";
+      setTimeout(function () {
+        el.textContent = oldText;
+      }, 900);
+    }
   </script>
 </body>
 </html>
