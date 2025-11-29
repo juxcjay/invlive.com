@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Invlive — Investment Plans</title>
+<style>
+:root{--accent:#0b6efd;--muted:#6b7280;--card:#ffffff;--bg:#f7f9fc;--container:1100px;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+body{margin:0;background:var(--bg);color:#0f172a;line-height:1.45}
+.wrap{max-width:var(--container);margin:28px auto;padding:0 18px}
+.header{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center}
+.logo-box{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#0b6efd,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+nav a{margin-left:14px;color:var(--muted);text-decoration:none;font-size:14px}
+.hero{display:flex;gap:28px;align-items:flex-start;margin-top:18px}
+.hero-left{flex:1}
+.hero h1{margin:0;font-size:28px}
+.hero p{color:var(--muted);margin-top:8px}
+.btn{background:var(--accent);color:white;padding:10px 16px;border-radius:8px;border:none;cursor:pointer}
+.grid{display:grid;grid-template-columns:1fr 420px;gap:18px;margin-top:18px}
+.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 20px rgba(12,12,30,0.06)}
+.plan{border-left:4px solid rgba(11,110,253,0.08);padding-left:12px;margin-bottom:12px}
+.plan-title{display:flex;justify-content:space-between;align-items:center}
+.small{font-size:13px;color:var(--muted)}
+.currency-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.copy-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.qr-block{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px}
+.footer{margin-top:28px;padding-top:18px;border-top:1px solid #e6edf7;color:var(--muted)}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.hero{flex-direction:column}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <div class="brand">
+        <div class="logo-box">IV</div>
+        <div>
+          <div style="font-weight:700">invlive</div>
+          <div class="small">invlive.com · Bitcoin payments only</div>
+        </div>
+      </div>
+      <nav>
+        <a href="#plans">Plans</a>
+        <a href="#payments">Payments</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Invest with <strong>invlive</strong> — Worldwide currencies</h1>
+        <p>Plans are defined in Euros (€). Choose your currency and the site converts plan ranges automatically using live rates.</p>
+        <div style="margin-top:12px">
+          <button class="btn" onclick="document.getElementById('plans').scrollIntoView()">View Plans</button>
+        </div>
+        <div class="small" style="margin-top:12px">Risk Notice: Investments carry risk. Read Terms & Conditions below.</div>
+      </div>
+
+      <div style="width:360px" class="card">
+        <div style="font-weight:700">Currency & Quick Validator</div>
+        <div class="small" style="margin-top:8px">Pick a currency — plan values update automatically.</div>
+        <div style="margin-top:10px">
+          <div class="currency-row">
+            <label style="min-width:80px">Currency</label>
+            <select id="currency_select"></select>
+            <button class="btn" id="refreshBtn" style="margin-left:8px">Refresh rates</button>
+          </div>
+
+          <div style="margin-top:8px">
+            <input id="calc_amount" type="number" placeholder="Amount in selected currency" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8" />
+            <select id="calc_plan" style="margin-top:8px;width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8">
+              <option>Bronze</option><option>Silver</option><option>Gold</option>
+            </select>
+            <button class="btn" style="margin-top:10px;width:100%" onclick="validatePlan()">Check Plan</button>
+            <div id="plan_result" class="small" style="margin-top:10px">Plan validation will appear here.</div>
+          </div>
+
+          <div style="margin-top:12px" class="small"><strong>EUR → BTC:</strong> <span id="eur_btc">loading...</span></div>
+          <div style="margin-top:8px" class="small">
+            <label>Convert amount to BTC:</label>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <input id="convert_amount" type="number" placeholder="Amount in selected currency" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6eef8" />
+              <button class="btn" onclick="convertToBTC()">To BTC</button>
+            </div>
+            <div id="btc_result" class="small" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="plans" class="grid">
+      <div>
+        <div class="card plan">
+          <div class="plan-title"><div><strong>Bronze</strong></div><div id="bronze_range">€2,000 — €49,999</div></div>
+          <div class="small" id="bronze_details"><div>Minimum: €2,000</div><div>Maximum: €49,999</div><div>Support: Standard</div></div>
+          <div style="margin-top:12px"><button class="btn" onclick="startInvest('Bronze')">Select Bronze</button> <span id="bronze_btc" class="small" style="margin-left:8px">—</span></div>
+        </div>
+
+        <div class="card plan">
+          <div class="plan-title"><div><strong>Silver</strong></div><div id="silver_range">€50,000 — €99,999</div></div>
+          <div class="small" id="silver_details"><div>Minimum: €50,000</div><div>Maximum: €99,999</div><div>Support: Priority</div></div>
+          <div style="margin-top:12px"><button class="btn" onclick="startInvest('Silver')">Select Silver</button> <span id="silver_btc" class="small" style="margin-left:8px">—</span></div>
+        </div>
+
+        <div class="card plan">
+          <div class="plan-title"><div><strong>Gold</strong></div><div id="gold_range">€100,000+</div></div>
+          <div class="small" id="gold_details"><div>Minimum: €100,000</div><div>Support: Dedicated manager</div></div>
+          <div style="margin-top:12px"><button class="btn" onclick="startInvest('Gold')">Select Gold</button> <span id="gold_btc" class="small" style="margin-left:8px">—</span></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>FAQ</h3>
+          <div class="small">Contact: <a href="mailto:Invlive81@gmail.com">Invlive81@gmail.com</a></div>
+        </div>
+      </div>
+
+      <aside>
+        <div id="payments" class="card">
+          <h3>Bitcoin Payment — BTC only</h3>
+          <div class="small">Send Bitcoin to the address below or scan the QR. Always verify the address before sending.</div>
+
+          <h4 style="margin-top:12px">BTC address</h4>
+          <div class="copy-row">
+            <input id="btc_addr" value="3JSBrUPnaY5xRR6RUFqcwfMbQm5J4hvvdQ" readonly style="flex:1;padding:10px;border-radius:8px;border:1px solid #e6eef8" />
+            <button class="btn" onclick="copyText('btc_addr')">Copy</button>
+          </div>
+
+          <div class="qr-block">
+            <img id="qr_img" src="btc_qr.jpg" alt="BTC QR" style="max-width:300px;border-radius:8px;border:1px solid #e6eef8" />
+            <div id="qr_est" class="small">Estimating BTC...</div>
+          </div>
+
+          <div style="margin-top:12px" class="small"><strong>After payment:</strong> Send a screenshot to <a href="mailto:Invlive81@gmail.com">Invlive81@gmail.com</a> with plan & amount.</div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">
+      <div class="small">© <span id="year"></span> invlive. All rights reserved.</div>
+    </div>
+  </div>
+
+<script>
+const plansEUR = { Bronze:{min:2000, max:49999}, Silver:{min:50000, max:99999}, Gold:{min:100000, max:null} };
+const currencyList = ["EUR","USD","NGN","GBP","CAD","AUD","JPY","CNY","INR","ZAR","AED","SAR","BRL","MXN","RUB","TRY","CHF","SEK","NOK","DKK","PLN","KRW","SGD","HKD","IDR"];
+let rates = {EUR:1};
+let eurToBtc = null;
+
+function fmt(n, cur) {
+  if (n===null) return "—";
+  const rounded = Math.round(n);
+  try { return new Intl.NumberFormat(undefined,{style:'currency',currency:cur,maximumFractionDigits:0}).format(rounded); }
+  catch(e){ return rounded.toLocaleString() + ' ' + cur; }
+}
+
+function populateCurrency() {
+  const sel = document.getElementById('currency_select');
+  currencyList.forEach(c=>{ const opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); });
+  sel.value = 'EUR';
+  sel.addEventListener('change', ()=> updateDisplays(sel.value));
+}
+
+async function fetchRates() {
+  try {
+    const symbols = currencyList.join(',') + ',BTC';
+    const url = `https://api.exchangerate.host/latest?base=EUR&symbols=${encodeURIComponent(symbols)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data && data.rates) {
+      rates = data.rates;
+      if (rates.BTC) { eurToBtc = rates.BTC; delete rates.BTC; } else eurToBtc = null;
+      rates.EUR = 1;
+      document.getElementById('refreshBtn').textContent = 'Refresh rates';
+      updateDisplays(document.getElementById('currency_select').value || 'EUR');
+      return true;
+    }
+  } catch(e) {
+    console.error('fetchRates error', e);
+    document.getElementById('refreshBtn').textContent = 'Refresh failed (offline?)';
+  }
+  return false;
+}
+
+function updateDisplays(cur) {
+  const rate = rates[cur] || 1;
+  const bMin = plansEUR.Bronze.min * rate;
+  const bMax = plansEUR.Bronze.max * rate;
+  document.getElementById('bronze_range').textContent = `${fmt(bMin,cur)} — ${fmt(bMax,cur)}`;
+  document.getElementById('bronze_details').innerHTML = `<div>Minimum: ${fmt(bMin,cur)}</div><div>Maximum: ${fmt(bMax,cur)}</div><div>Support: Standard</div>`;
+
+  const sMin = plansEUR.Silver.min * rate;
+  const sMax = plansEUR.Silver.max * rate;
+  document.getElementById('silver_range').textContent = `${fmt(sMin,cur)} — ${fmt(sMax,cur)}`;
+  document.getElementById('silver_details').innerHTML = `<div>Minimum: ${fmt(sMin,cur)}</div><div>Maximum: ${fmt(sMax,cur)}</div><div>Support: Priority</div>`;
+
+  const gMin = plansEUR.Gold.min * rate;
+  document.getElementById('gold_range').textContent = `${fmt(gMin,cur)}+`;
+  document.getElementById('gold_details').innerHTML = `<div>Minimum: ${fmt(gMin,cur)}</div><div>Support: Dedicated manager</div>`;
+
+  if (eurToBtc) {
+    document.getElementById('eur_btc').textContent = `1 EUR = ${eurToBtc} BTC`;
+    document.getElementById('bronze_btc').textContent = `≈ ${(plansEUR.Bronze.min * eurToBtc).toFixed(8)} BTC`;
+    document.getElementById('silver_btc').textContent = `≈ ${(plansEUR.Silver.min * eurToBtc).toFixed(8)} BTC`;
+    document.getElementById('gold_btc').textContent = `≈ ${(plansEUR.Gold.min * eurToBtc).toFixed(8)} BTC`;
+    document.getElementById('qr_est').textContent = `Send approx ${(plansEUR.Bronze.min * eurToBtc).toFixed(8)} BTC (Bronze min)`;
+  } else {
+    document.getElementById('eur_btc').textContent = 'Unavailable';
+    document.getElementById('bronze_btc').textContent = '—';
+    document.getElementById('silver_btc').textContent = '—';
+    document.getElementById('gold_btc').textContent = '—';
+    document.getElementById('qr_est').textContent = 'BTC estimate unavailable';
+  }
+}
+
+function validatePlan() {
+  const amt = Number(document.getElementById('calc_amount').value) || 0;
+  const plan = document.getElementById('calc_plan').value;
+  const cur = document.getElementById('currency_select').value;
+  const rate = rates[cur] || 1;
+  const bMin = Math.round(plansEUR.Bronze.min * rate);
+  const bMax = Math.round(plansEUR.Bronze.max * rate);
+  const sMin = Math.round(plansEUR.Silver.min * rate);
+  const sMax = Math.round(plansEUR.Silver.max * rate);
+  const gMin = Math.round(plansEUR.Gold.min * rate);
+  let ok=false, reason='';
+  if (plan==='Bronze') { if (amt>=bMin && amt<=bMax) ok=true; else reason=`Bronze requires ${fmt(bMin,cur)} - ${fmt(bMax,cur)}`; }
+  if (plan==='Silver') { if (amt>=sMin && amt<=sMax) ok=true; else reason=`Silver requires ${fmt(sMin,cur)} - ${fmt(sMax,cur)}`; }
+  if (plan==='Gold') { if (amt>=gMin) ok=true; else reason=`Gold requires at least ${fmt(gMin,cur)}`; }
+  document.getElementById('plan_result').textContent = ok? `Valid for ${plan}` : `Invalid: ${reason}`;
+  return ok;
+}
+
+function convertToBTC() {
+  const cur = document.getElementById('currency_select').value;
+  const amt = Number(document.getElementById('convert_amount').value) || 0;
+  if (!eurToBtc) { document.getElementById('btc_result').textContent = 'BTC rate unavailable. Refresh rates.'; return; }
+  const rate = rates[cur] || 1;
+  const eur_amt = amt / rate;
+  const btc_amt = eur_amt * eurToBtc;
+  document.getElementById('btc_result').textContent = `${amt} ${cur} ≈ ${btc_amt.toFixed(8)} BTC`;
+}
+
+function copyText(id) { const el=document.getElementById(id); el.select?el.select():null; navigator.clipboard?.writeText(el.value).then(()=>alert('Copied')).catch(()=>prompt('Copy this address',el.value)); }
+function startInvest(plan){ const cur=document.getElementById('currency_select').value; const rate=rates[cur]||1; const amount=Math.round((plan==='Bronze')?plansEUR.Bronze.min*rate:(plan==='Silver')?plansEUR.Silver.min*rate:plansEUR.Gold.min*rate); alert(`Selected ${plan}. Minimum amount: ${amount} ${cur}`); }
+
+document.getElementById('year').textContent = new Date().getFullYear();
+populateCurrency();
+fetchRates();
+document.getElementById('refreshBtn').addEventListener('click', ()=>{ document.getElementById('refreshBtn').textContent = 'Refreshing...'; fetchRates(); });
+</script>
+</body>
+</html>

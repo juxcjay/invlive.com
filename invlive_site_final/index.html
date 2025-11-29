@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Invlive — Investment Plans (Multi-currency)</title>
+  <style>
+    :root{--accent:#0b6efd;--muted:#6b7280;--card:#ffffff;--bg:#f7f9fc;--container:1100px;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{margin:0;background:var(--bg);color:#0f172a;line-height:1.45}
+    .wrap{max-width:var(--container);margin:28px auto;padding:0 18px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+    .logo-box{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#0b6efd,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+    nav a{margin-left:14px;color:var(--muted);text-decoration:none;font-size:14px}
+    .hero{display:flex;gap:28px;align-items:center;margin-top:18px}
+    .hero-left{flex:1}
+    .hero h1{margin:0;font-size:26px}
+    .hero p{color:var(--muted);margin-top:8px}
+    .cta{margin-top:12px}
+    .btn{background:var(--accent);color:white;padding:10px 16px;border-radius:8px;border:none;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(12,12,30,0.06)}
+    .plan-title{display:flex;justify-content:space-between;align-items:center}
+    .plan-price{font-size:16px;font-weight:700}
+    .plan-list{margin:10px 0;color:var(--muted)}
+    .small{font-size:13px;color:var(--muted)}
+    .pay-methods{display:flex;gap:12px;flex-wrap:wrap}
+    .chip{background:#f1f5f9;padding:8px 10px;border-radius:8px;font-weight:600}
+    footer{margin:34px 0;padding:18px 0;border-top:1px solid #e6edf7;color:var(--muted)}
+    .two-col{display:grid;grid-template-columns:1fr 340px;gap:18px}
+    @media(max-width:760px){.hero{flex-direction:column}.two-col{grid-template-columns:1fr}}
+    input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;margin-top:8px}
+    .tiny{font-size:12px;color:var(--muted)}
+    .copy-row{display:flex;gap:8px;align-items:center}
+    .footer-grid{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .currency-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <a class="logo" href="https://invlive.com" target="_blank" rel="noopener noreferrer">
+          <div class="logo-box" aria-hidden="true">IV</div>
+          <div>
+            <div style="font-weight:700">invlive</div>
+            <div class="tiny">invlive.com · Secure · BTC-only</div>
+          </div>
+        </a>
+      </div>
+      <nav>
+        <a href="#plans">Plans</a>
+        <a href="#payments">Payments</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Invest with invlive — Worldwide currencies</h1>
+        <p>Plans are defined in Euros (€). Choose your currency and the site will convert plan ranges to the selected currency instantly.</p>
+        <div class="cta">
+          <button class="btn" onclick="document.getElementById('plans').scrollIntoView()">View Plans</button>
+        </div>
+        <div style="margin-top:12px" class="small">Risk Notice: Investments carry risk. Read Terms & Conditions below.</div>
+      </div>
+
+      <div style="flex:0 0 360px" class="card">
+        <div style="font-weight:700">Currency & Quick Validator</div>
+        <div style="margin-top:8px" class="small">Pick a currency — plan values will update to that currency.</div>
+
+        <div style="margin-top:10px">
+          <div class="currency-row">
+            <label style="min-width:80px">Currency</label>
+            <select id="currency_select"></select>
+            <button class="btn" id="refreshBtn" style="margin-left:8px">Refresh rates</button>
+          </div>
+
+          <div style="margin-top:8px">
+            <input id="calc-amount" type="number" placeholder="Amount in selected currency" value="2000" />
+            <select id="calc-plan" style="margin-top:8px">
+              <option value="Bronze">Bronze</option>
+              <option value="Silver">Silver</option>
+              <option value="Gold">Gold</option>
+            </select>
+            <button class="btn" style="margin-top:10px" onclick="validatePlan()">Check Plan</button>
+            <div id="plan-result" class="small" style="margin-top:10px">Plan validation result will appear here.</div>
+          </div>
+
+          <div style="margin-top:12px" class="small">
+            <strong>EUR → BTC:</strong> <span id="eur_btc">loading...</span>
+          </div>
+
+          <div style="margin-top:8px" class="small">
+            <label>Convert amount to BTC:</label>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <input id="convert_amount" type="number" placeholder="Amount in selected currency" />
+              <button class="btn" onclick="convertToBTC()">To BTC</button>
+            </div>
+            <div id="btc_result" class="small" style="margin-top:8px"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="plans" style="margin-top:18px">
+      <h2>Investment Plans</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="plan-title">
+            <div><strong>Bronze</strong></div>
+            <div class="plan-price" id="bronze_range">€2,000 — €49,999</div>
+          </div>
+          <div class="plan-list" id="bronze_list">
+            <div>Minimum: €2,000</div>
+            <div>Maximum: €49,999</div>
+            <div>Return: Contact support for tailored rates</div>
+            <div>Support: Standard</div>
+          </div>
+          <div><button class="btn" onclick="startInvest('Bronze')">Select Bronze</button></div>
+        </div>
+
+        <div class="card">
+          <div class="plan-title">
+            <div><strong>Silver</strong></div>
+            <div class="plan-price" id="silver_range">€50,000 — €99,999</div>
+          </div>
+          <div class="plan-list" id="silver_list">
+            <div>Minimum: €50,000</div>
+            <div>Maximum: €99,999</div>
+            <div>Return: Contact support for tailored rates</div>
+            <div>Support: Priority</div>
+          </div>
+          <div><button class="btn" onclick="startInvest('Silver')">Select Silver</button></div>
+        </div>
+
+        <div class="card">
+          <div class="plan-title">
+            <div><strong>Gold</strong></div>
+            <div class="plan-price" id="gold_range">€100,000+</div>
+          </div>
+          <div class="plan-list" id="gold_list">
+            <div>Minimum: €100,000</div>
+            <div>Return: Custom institutional rates — contact support</div>
+            <div>Support: Dedicated manager</div>
+          </div>
+          <div><button class="btn" onclick="startInvest('Gold')">Select Gold</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="payments" style="margin-top:18px">
+      <h2>Payment Method — Bitcoin (BTC) Only</h2>
+      <div class="two-col" style="gap:18px;margin-top:12px">
+        <div>
+          <div class="card">
+            <h3>Bitcoin Payment</h3>
+            <div class="small" style="margin-top:8px">Send Bitcoin to the address below (or scan the QR). Always confirm the address before sending.</div>
+
+            <h4 style="margin-top:12px">BTC address</h4>
+            <div class="small">
+              <div class="copy-row" style="margin-top:6px">
+                <input id="btc_addr" value="3JSBrUPnaY5xRR6RUFqcwfMbQm5J4hvvdQ" readonly />
+                <button onclick="copyText('btc_addr')" class="btn" style="padding:8px">Copy</button>
+              </div>
+            </div>
+
+            <h4 style="margin-top:12px">Scan QR to pay</h4>
+            <div style="margin-top:8px;text-align:center">
+              <img id="qr_img" src="btc_qr.jpg" alt="BTC QR" style="max-width:260px;border-radius:8px;border:1px solid #e6eef8"/>
+              <div class="tiny" style="margin-top:8px">URI used: <code>bitcoin:3JSBrUPnaY5xRR6RUFqcwfMbQm5J4hvvdQ</code></div>
+            </div>
+
+            <h4 style="margin-top:12px">After payment</h4>
+            <div class="small">Send a screenshot of the transaction to <a class="link" href="mailto:Invlive81@gmail.com">Invlive81@gmail.com</a> with your plan name and amount. Confirmations depend on network speed.</div>
+          </div>
+        </div>
+
+        <aside>
+          <div class="card">
+            <h4>Minimum/Maximum (converted)</h4>
+            <div class="small" id="minmax_summary">Bronze: €2,000 — €49,999<br/>Silver: €50,000 — €99,999<br/>Gold: €100,000+</div>
+            <h4 style="margin-top:12px">Fees</h4>
+            <div class="small">Network fees apply and are paid by the sender.</div>
+            <h4 style="margin-top:12px">Support</h4>
+            <div class="small">Email: <a class="link" href="mailto:Invlive81@gmail.com">Invlive81@gmail.com</a></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="contact" style="margin-top:18px">
+      <h2>Contact & Start Investment</h2>
+      <div class="card">
+        <form onsubmit="handleForm(event)">
+          <label>Your name</label>
+          <input id="name" required placeholder="Full name" />
+          <label>Email</label>
+          <input id="email" type="email" required placeholder="you@example.com" />
+          <label>Plan</label>
+          <select id="plan_select">
+            <option>Bronze</option><option>Silver</option><option>Gold</option>
+          </select>
+          <label>Amount</label>
+          <input id="amount" type="number" value="2000" required />
+          <label>Currency</label>
+          <select id="currency" style="margin-top:6px"></select>
+          <button class="btn" style="margin-top:10px">Request Payment Instructions</button>
+          <div class="tiny" style="margin-top:10px">We'll email payment steps once you submit. (This demo form uses mailto fallback.)</div>
+        </form>
+      </div>
+    </section>
+
+    <section style="margin-top:18px">
+      <h2>Terms & Conditions — Risk Notice</h2>
+      <div class="card small">
+        <p><strong>Important:</strong> Investments are subject to risk. Past performance is not indicative of future results. invlive uses third-party processors and on-chain Bitcoin — you must verify addresses before sending. Contact Invlive81@gmail.com for support.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-grid">
+        <div>© <span id="year"></span> invlive. All rights reserved.</div>
+        <div><a href="#terms" class="tiny">Terms</a> · <a href="#privacy" class="tiny">Privacy</a></div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Plan definitions in EUR
+    const plansEUR = {
+      Bronze: { min: 2000, max: 49999 },
+      Silver: { min: 50000, max: 99999 },
+      Gold: { min: 100000, max: null } // null = no upper limit
+    };
+
+    // Currencies we support in the selector
+    const currencyList = ["EUR","USD","NGN","GBP","CAD","AUD","JPY","CNY","INR","ZAR","AED","SAR","BRL","MXN","RUB","TRY","CHF","SEK","NOK","DKK","PLN","KRW","SGD","HKD","IDR"];
+
+    // Current exchange rates map (rate = 1 EUR -> rate units of currency)
+    let rates = { EUR: 1 };
+    let eurToBtc = null; // 1 EUR in BTC
+
+    // Utility: format numbers nicely for display
+    function fmt(n, currency) {
+      if (n === null) return "—";
+      const rounded = Math.round(n);
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency, maximumFractionDigits: 0 }).format(rounded);
+      } catch (e) {
+        // fallback for unknown currencies (like IDR sometimes)
+        return rounded.toLocaleString() + ' ' + currency;
+      }
+    }
+
+    // Populate currency selectors
+    function populateCurrencySelectors() {
+      const csel = document.getElementById('currency_select');
+      const formC = document.getElementById('currency');
+      currencyList.forEach(cur => {
+        const opt = document.createElement('option'); opt.value = cur; opt.textContent = cur;
+        csel.appendChild(opt);
+        const opt2 = document.createElement('option'); opt2.value = cur; opt2.textContent = cur;
+        formC.appendChild(opt2);
+      });
+      // default to EUR
+      csel.value = 'EUR';
+      formC.value = 'EUR';
+    }
+
+    // Fetch rates from exchangerate.host (1 EUR -> X currency). Also fetch BTC via exchangerate.host if available.
+    async function fetchRates(base='EUR') {
+      try {
+        const symbols = currencyList.join(',') + ',BTC';
+        const url = `https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=${encodeURIComponent(symbols)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.rates) {
+          rates = data.rates;
+          if (rates.BTC) {
+            // exchangerate.host returns BTC as number of BTC per EUR?
+            eurToBtc = rates.BTC;
+            // remove BTC from rates for currency conversions
+            delete rates.BTC;
+          } else {
+            eurToBtc = null;
+          }
+          rates[base] = 1;
+          return rates;
+        }
+      } catch (e) {
+        console.error('FX fetch error', e);
+      }
+      return null;
+    }
+
+    // Update plan displays to selected currency using latest rate
+    function updatePlanDisplays(currency) {
+      const rate = rates[currency] || 1; // 1 EUR = rate * currency
+      // Bronze
+      const bMin = plansEUR.Bronze.min * rate;
+      const bMax = plansEUR.Bronze.max * rate;
+      document.getElementById('bronze_range').textContent = `${fmt(bMin, currency)} — ${fmt(bMax, currency)}`;
+      document.getElementById('bronze_list').innerHTML = `<div>Minimum: ${fmt(bMin, currency)}</div><div>Maximum: ${fmt(bMax, currency)}</div><div>Return: Contact support for tailored rates</div><div>Support: Standard</div>`;
+
+      // Silver
+      const sMin = plansEUR.Silver.min * rate;
+      const sMax = plansEUR.Silver.max * rate;
+      document.getElementById('silver_range').textContent = `${fmt(sMin, currency)} — ${fmt(sMax, currency)}`;
+      document.getElementById('silver_list').innerHTML = `<div>Minimum: ${fmt(sMin, currency)}</div><div>Maximum: ${fmt(sMax, currency)}</div><div>Return: Contact support for tailored rates</div><div>Support: Priority</div>`;
+
+      // Gold
+      const gMin = plansEUR.Gold.min * rate;
+      document.getElementById('gold_range').textContent = `${fmt(gMin, currency)}+`;
+      document.getElementById('gold_list').innerHTML = `<div>Minimum: ${fmt(gMin, currency)}</div><div>Return: Custom institutional rates — contact support</div><div>Support: Dedicated manager</div>`;
+
+      // Update summary and the currency dropdown in the contact form to the same currency
+      document.getElementById('minmax_summary').innerHTML = `Bronze: ${fmt(bMin,currency)} — ${fmt(bMax,currency)}<br/>Silver: ${fmt(sMin,currency)} — ${fmt(sMax,currency)}<br/>Gold: ${fmt(gMin,currency)}+`;
+
+      // Update calc amount placeholder to show approx €2000 converted
+      const approx2000 = Math.round(2000 * rate);
+      document.getElementById('calc-amount').placeholder = `${fmt(approx2000, currency)} (approx value of €2,000)`;
+
+      // Update the currency field in the contact form
+      document.getElementById('currency').value = currency;
+
+      // Update EUR->BTC display if available
+      if (eurToBtc) {
+        document.getElementById('eur_btc').textContent = `1 EUR = ${eurToBtc} BTC  (≈ ${Number(eurToBtc).toFixed(8)} BTC)`;
+      } else {
+        document.getElementById('eur_btc').textContent = 'Unavailable';
+      }
+    }
+
+    // Validate a user-entered amount against selected plan using converted numbers
+    function validatePlan() {
+      const amt = Number(document.getElementById('calc-amount').value) || 0;
+      const plan = document.getElementById('calc-plan').value;
+      const cur = document.getElementById('currency_select').value;
+      const rate = rates[cur] || 1;
+
+      // Convert plan EUR thresholds to selected currency
+      const bMin = Math.round(plansEUR.Bronze.min * rate);
+      const bMax = Math.round(plansEUR.Bronze.max * rate);
+      const sMin = Math.round(plansEUR.Silver.min * rate);
+      const sMax = Math.round(plansEUR.Silver.max * rate);
+      const gMin = Math.round(plansEUR.Gold.min * rate);
+
+      let ok = false, reason = '';
+      if (plan === 'Bronze') {
+        if (amt >= bMin && amt <= bMax) ok = true; else reason = `For Bronze you must enter between ${fmt(bMin,cur)} and ${fmt(bMax,cur)}.`;
+      } else if (plan === 'Silver') {
+        if (amt >= sMin && amt <= sMax) ok = true; else reason = `For Silver you must enter between ${fmt(sMin,cur)} and ${fmt(sMax,cur)}.`;
+      } else if (plan === 'Gold') {
+        if (amt >= gMin) ok = true; else reason = `For Gold you must enter at least ${fmt(gMin,cur)}.`;
+      }
+      document.getElementById('plan-result').innerHTML = ok ? `<strong>Valid for ${plan}</strong> — proceed to payment.` : `<strong>Invalid:</strong> ${reason}`;
+      return ok;
+    }
+
+    // Convert an entered amount (in selected currency) to BTC using eurToBtc and rates
+    function convertToBTC() {
+      const cur = document.getElementById('currency_select').value;
+      const amt = Number(document.getElementById('convert_amount').value) || 0;
+      if (!eurToBtc) {
+        document.getElementById('btc_result').textContent = 'BTC rate is unavailable. Refresh rates.';
+        return;
+      }
+      const rate = rates[cur] || 1; // 1 EUR = rate * cur
+      // To get EUR amount: if amt is in selected currency => eur_amt = amt / rate
+      const eur_amt = amt / rate;
+      const btc_amt = eur_amt * eurToBtc;
+      document.getElementById('btc_result').innerHTML = `${amt} ${cur} ≈ ${btc_amt.toFixed(8)} BTC (based on current EUR→BTC)`;
+    }
+
+    // Copy to clipboard helper
+    function copyText(id){
+      const el = document.getElementById(id);
+      el.select ? el.select() : null;
+      navigator.clipboard?.writeText(el.value).then(() => alert('Copied: ' + el.value)).catch(()=>prompt('Copy this address', el.value));
+    }
+
+    // When a plan button is clicked — prefill contact form and amount with minimum (converted)
+    function startInvest(plan){
+      const cur = document.getElementById('currency_select').value;
+      const rate = rates[cur] || 1;
+      const amount = Math.round((plan === 'Bronze') ? plansEUR.Bronze.min * rate : (plan === 'Silver') ? plansEUR.Silver.min * rate : plansEUR.Gold.min * rate);
+      location.href = '#contact';
+      document.getElementById('plan_select').value = plan;
+      document.getElementById('amount').value = amount;
+      document.getElementById('currency').value = cur;
+      window.scrollTo({top: document.getElementById('contact').offsetTop - 20, behavior:'smooth'});
+    }
+
+    // Form submission (mailto fallback)
+    function handleForm(e){
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const plan = document.getElementById('plan_select').value;
+      const amount = document.getElementById('amount').value;
+      const currency = document.getElementById('currency').value;
+      const subject = encodeURIComponent('Payment instructions request: ' + plan + ' - ' + name);
+      const body = encodeURIComponent('Name: ' + name + '\\nEmail: ' + email + '\\nPlan: ' + plan + '\\nAmount: ' + amount + ' ' + currency + '\\n\\nPlease send payment instructions.');
+      window.location.href = 'mailto:Invlive81@gmail.com?subject=' + subject + '&body=' + body;
+    }
+
+    // Initialize page: populate selectors, fetch rates and update displays
+    async function init() {
+      populateCurrencySelectors();
+      await fetchRates('EUR'); // get rates where 1 EUR = x currency and BTC
+      // default currency
+      const defaultCur = 'EUR';
+      document.getElementById('currency_select').value = defaultCur;
+      // update initial displays
+      updatePlanDisplays(defaultCur);
+
+      // on currency change: update display and contact form currency
+      document.getElementById('currency_select').addEventListener('change', async (e) => {
+        const cur = e.target.value;
+        if (!rates[cur]) {
+          await fetchRates('EUR');
+        }
+        updatePlanDisplays(cur);
+      });
+
+      // refresh button behavior
+      document.getElementById('refreshBtn').addEventListener('click', async () => {
+        document.getElementById('refreshBtn').textContent = 'Refreshing...';
+        await fetchRates('EUR');
+        const cur = document.getElementById('currency_select').value || 'EUR';
+        updatePlanDisplays(cur);
+        document.getElementById('refreshBtn').textContent = 'Refresh rates';
+      });
+    }
+
+    // run init
+    init();
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

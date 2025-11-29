@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Invlive — Plans (manual-rate fallback)</title>
+<style>
+:root{--accent:#0b6efd;--muted:#6b7280;--card:#ffffff;--bg:#f7f9fc;--container:1100px;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+body{margin:0;background:var(--bg);color:#0f172a;line-height:1.45}
+.wrap{max-width:var(--container);margin:28px auto;padding:0 18px}
+.header-row{display:flex;justify-content:space-between;align-items:center}
+.card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(12,12,30,0.06);margin-bottom:12px}
+.small{font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+.plan-title{display:flex;justify-content:space-between;align-items:center}
+.btn{background:var(--accent);color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+.copy-row{display:flex;gap:8px;align-items:center}
+.currency-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.qr-block{display:flex;flex-direction:column;align-items:center;gap:8px}
+.btc-note{font-size:13px;color:#0b6efd;margin-left:8px}
+.status{font-size:13px;color:#6b7280;margin-top:8px}
+.override{margin-top:10px;padding:10px;border-radius:8px;background:#f1f5f9}
+input[type="number"]{width:150px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header-row">
+    <div>
+      <h2>Investment Plans</h2>
+      <div class="small">Plans defined in EUR, converted live to selected currency. If rates can't be fetched (e.g., opened via file://), use manual override below.</div>
+    </div>
+    <div>
+      <label>Currency:</label>
+      <select id="currency_select"></select>
+      <button id="refreshBtn" class="btn">Refresh rates</button>
+      <div id="status" class="status">Status: initializing...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>Quick validator</strong>
+    <div class="small">Enter amount and pick plan to validate.</div>
+    <div style="margin-top:8px">
+      <input id="calc_amount" type="number" placeholder="Amount in selected currency" />
+      <select id="calc_plan">
+        <option>Bronze</option><option>Silver</option><option>Gold</option>
+      </select>
+      <button class="btn" onclick="validatePlan()">Check</button>
+      <div id="plan_result" class="small"></div>
+    </div>
+  </div>
+
+  <div id="plans_grid" class="grid">
+    <div class="card" id="bronze_card">
+      <div class="plan-title"><div><strong>Bronze</strong></div><div id="bronze_range">€2,000 — €49,999</div></div>
+      <div class="small" id="bronze_details">
+        <div>Minimum: €2,000</div>
+        <div>Maximum: €49,999</div>
+      </div>
+      <div style="margin-top:8px"><button class="btn" onclick="startInvest('Bronze')">Select Bronze</button> <span id="bronze_btc" class="btc-note">—</span></div>
+    </div>
+
+    <div class="card" id="silver_card">
+      <div class="plan-title"><div><strong>Silver</strong></div><div id="silver_range">€50,000 — €99,999</div></div>
+      <div class="small" id="silver_details">
+        <div>Minimum: €50,000</div>
+        <div>Maximum: €99,999</div>
+      </div>
+      <div style="margin-top:8px"><button class="btn" onclick="startInvest('Silver')">Select Silver</button> <span id="silver_btc" class="btc-note">—</span></div>
+    </div>
+
+    <div class="card" id="gold_card">
+      <div class="plan-title"><div><strong>Gold</strong></div><div id="gold_range">€100,000+</div></div>
+      <div class="small" id="gold_details">
+        <div>Minimum: €100,000</div>
+      </div>
+      <div style="margin-top:8px"><button class="btn" onclick="startInvest('Gold')">Select Gold</button> <span id="gold_btc" class="btc-note">—</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Payment / QR</h3>
+    <div class="copy-row">
+      <input id="btc_addr" value="3JSBrUPnaY5xRR6RUFqcwfMbQm5J4hvvdQ" readonly style="width:320px"/>
+      <button class="btn" onclick="copyText('btc_addr')">Copy</button>
+    </div>
+    <div style="margin-top:12px" class="qr-block">
+      <img src="btc_qr.jpg" alt="qr" style="max-width:260px;border-radius:8px;border:1px solid #e6eef8"/>
+      <div id="qr_est" class="small">Estimating BTC...</div>
+    </div>
+  </div>
+
+  <div class="card override">
+    <strong>Manual rate override (use this if conversion doesn't change)</strong>
+    <div class="small">Sometimes browsers block live fetch when opening files locally (file://). If values don't update, paste the rates here and click "Apply manual rates".</div>
+    <div style="margin-top:8px">
+      <label>EUR → selected currency rate (how many selected currency units = 1 EUR)</label><br/>
+      <input id="manual_rate" type="number" step="any" placeholder="e.g., 1674.5 for NGN" />
+    </div>
+    <div style="margin-top:8px">
+      <label>EUR → BTC rate (how many BTC = 1 EUR)</label><br/>
+      <input id="manual_eur_btc" type="number" step="any" placeholder="e.g., 0.000030" />
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn" onclick="applyManualRates()">Apply manual rates</button>
+      <button class="btn" onclick="clearManualRates()" style="background:#6b7280;margin-left:8px">Clear override</button>
+    </div>
+    <div class="small" style="margin-top:8px">Tip: For NGN you can enter <strong>1674.5</strong> to make €2,000 ≈ ₦3,349,000 (multiply €2000 × 1674.5).</div>
+  </div>
+
+  <div class="small card">
+    <strong>Notes:</strong> Values convert live. If you open this via file:// and conversion doesn't change, either run a local server (see instructions below) or use manual override above.
+    <div style="margin-top:8px">
+      <strong>Run local server (recommended):</strong>
+      <pre style="background:#fff;padding:8px;border-radius:6px"># python 3 (in site folder)
+python -m http.server 8000
+
+# then open http://localhost:8000 in your browser</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+const plansEUR = { Bronze:{min:2000, max:49999}, Silver:{min:50000, max:99999}, Gold:{min:100000, max:null} };
+const currencyList = ["EUR","USD","NGN","GBP","CAD","AUD","JPY","CNY","INR","ZAR","AED","SAR","BRL","MXN","RUB","TRY","CHF","SEK","NOK","DKK","PLN","KRW","SGD","HKD","IDR"];
+let rates = {EUR:1};
+let eurToBtc = null;
+let manualOverride = { active:false, rate:null, eurbtc:null };
+
+function fmt(n, cur) {
+  if (n===null) return "—";
+  const rounded = Math.round(n);
+  try { return new Intl.NumberFormat(undefined,{style:'currency',currency:cur,maximumFractionDigits:0}).format(rounded); }
+  catch(e){ return rounded.toLocaleString() + ' ' + cur; }
+}
+
+function populate() {
+  const sel = document.getElementById('currency_select');
+  currencyList.forEach(c=>{
+    const opt=document.createElement('option'); opt.value=c; opt.textContent=c; sel.appendChild(opt);
+  });
+  sel.value='EUR';
+}
+
+async function fetchRates(){
+  try{
+    const symbols = currencyList.join(',') + ',BTC';
+    const url = `https://api.exchangerate.host/latest?base=EUR&symbols=${encodeURIComponent(symbols)}`;
+    const r = await fetch(url);
+    const data = await r.json();
+    if(data && data.rates){
+      rates = data.rates;
+      if(rates.BTC){ eurToBtc = rates.BTC; delete rates.BTC; } else eurToBtc = null;
+      rates.EUR = 1;
+      document.getElementById('status').textContent = 'Status: Fetched rates from exchangerate.host';
+      return true;
+    }
+  }catch(e){
+    console.error(e);
+    document.getElementById('status').textContent = 'Status: Failed to fetch rates (blocked or offline). Use manual override or run a local server.';
+  }
+  return false;
+}
+
+function updateDisplays(cur){
+  const rate = manualOverride.active && manualOverride.rate && manualOverride.manualCurrency === cur ? manualOverride.rate : (rates[cur] || 1);
+  const bMin = plansEUR.Bronze.min * rate;
+  const bMax = plansEUR.Bronze.max * rate;
+  document.getElementById('bronze_range').textContent = `${fmt(bMin,cur)} — ${fmt(bMax,cur)}`;
+  document.getElementById('bronze_details').innerHTML = `<div>Minimum: ${fmt(bMin,cur)}</div><div>Maximum: ${fmt(bMax,cur)}</div>`;
+
+  const sMin = plansEUR.Silver.min * rate;
+  const sMax = plansEUR.Silver.max * rate;
+  document.getElementById('silver_range').textContent = `${fmt(sMin,cur)} — ${fmt(sMax,cur)}`;
+  document.getElementById('silver_details').innerHTML = `<div>Minimum: ${fmt(sMin,cur)}</div><div>Maximum: ${fmt(sMax,cur)}</div>`;
+
+  const gMin = plansEUR.Gold.min * rate;
+  document.getElementById('gold_range').textContent = `${fmt(gMin,cur)}+`;
+  document.getElementById('gold_details').innerHTML = `<div>Minimum: ${fmt(gMin,cur)}</div>`;
+
+  // BTC per plan: use manual eur->btc if provided, otherwise eurToBtc
+  const eurbtc = manualOverride.active && manualOverride.eurbtc ? manualOverride.eurbtc : eurToBtc;
+  if(eurbtc){
+    const bBtc = (plansEUR.Bronze.min * eurbtc).toFixed(8);
+    const sBtc = (plansEUR.Silver.min * eurbtc).toFixed(8);
+    const gBtc = (plansEUR.Gold.min * eurbtc).toFixed(8);
+    document.getElementById('bronze_btc').textContent = `≈ ${bBtc} BTC`;
+    document.getElementById('silver_btc').textContent = `≈ ${sBtc} BTC`;
+    document.getElementById('gold_btc').textContent = `≈ ${gBtc} BTC`;
+    document.getElementById('qr_est').textContent = `Send approx ${bBtc} BTC (Bronze min)`;
+  } else {
+    document.getElementById('bronze_btc').textContent = '—';
+    document.getElementById('silver_btc').textContent = '—';
+    document.getElementById('gold_btc').textContent = '—';
+    document.getElementById('qr_est').textContent = 'BTC estimate unavailable';
+  }
+
+  document.getElementById('status').textContent = manualOverride.active ? 'Status: Using manual override rates' : 'Status: Showing live rates';
+}
+
+function validatePlan(){
+  const amt = Number(document.getElementById('calc_amount').value) || 0;
+  const plan = document.getElementById('calc_plan').value;
+  const cur = document.getElementById('currency_select').value;
+  const rate = manualOverride.active && manualOverride.rate && manualOverride.manualCurrency === cur ? manualOverride.rate : (rates[cur] || 1);
+  const bMin = Math.round(plansEUR.Bronze.min * rate);
+  const bMax = Math.round(plansEUR.Bronze.max * rate);
+  const sMin = Math.round(plansEUR.Silver.min * rate);
+  const sMax = Math.round(plansEUR.Silver.max * rate);
+  const gMin = Math.round(plansEUR.Gold.min * rate);
+  let ok=false, reason='';
+  if(plan==='Bronze'){ if(amt>=bMin && amt<=bMax) ok=true; else reason=`Bronze requires ${fmt(bMin,cur)} - ${fmt(bMax,cur)}`; }
+  if(plan==='Silver'){ if(amt>=sMin && amt<=sMax) ok=true; else reason=`Silver requires ${fmt(sMin,cur)} - ${fmt(sMax,cur)}`; }
+  if(plan==='Gold'){ if(amt>=gMin) ok=true; else reason=`Gold requires at least ${fmt(gMin,cur)}`; }
+  document.getElementById('plan_result').textContent = ok? `Valid for ${plan}` : `Invalid: ${reason}`;
+  return ok;
+}
+
+function copyText(id){ const el=document.getElementById(id); el.select?el.select():null; navigator.clipboard?.writeText(el.value).then(()=>alert('Copied')).catch(()=>prompt('Copy',el.value)); }
+
+function startInvest(plan){
+  const cur = document.getElementById('currency_select').value;
+  const rate = manualOverride.active && manualOverride.rate && manualOverride.manualCurrency === cur ? manualOverride.rate : (rates[cur] || 1);
+  const amount = Math.round((plan==='Bronze')?plansEUR.Bronze.min * rate : (plan==='Silver')?plansEUR.Silver.min * rate : plansEUR.Gold.min * rate);
+  alert(`Selected ${plan}. Minimum amount: ${amount} ${cur}`);
+}
+
+function applyManualRates(){
+  const manual = Number(document.getElementById('manual_rate').value) || null;
+  const manualEurBtc = Number(document.getElementById('manual_eur_btc').value) || null;
+  const cur = document.getElementById('currency_select').value;
+  if(!manual && !manualEurBtc){ alert('Enter at least one manual rate'); return; }
+  manualOverride.active = true;
+  if(manual) { manualOverride.rate = manual; manualOverride.manualCurrency = cur; }
+  if(manualEurBtc) manualOverride.eurbtc = manualEurBtc;
+  updateDisplays(document.getElementById('currency_select').value || 'EUR');
+}
+
+function clearManualRates(){
+  manualOverride = {active:false, rate:null, eurbtc:null};
+  updateDisplays(document.getElementById('currency_select').value || 'EUR');
+  document.getElementById('manual_rate').value = '';
+  document.getElementById('manual_eur_btc').value = '';
+  document.getElementById('status').textContent = 'Status: Cleared manual override';
+}
+
+async function init(){
+  populate();
+  const ok = await fetchRates();
+  const cur = document.getElementById('currency_select').value || 'EUR';
+  updateDisplays(cur);
+  document.getElementById('currency_select').addEventListener('change', ()=>{
+    updateDisplays(document.getElementById('currency_select').value || 'EUR');
+  });
+  document.getElementById('refreshBtn').addEventListener('click', async ()=>{
+    document.getElementById('refreshBtn').textContent='Refreshing...';
+    await fetchRates();
+    updateDisplays(document.getElementById('currency_select').value || 'EUR');
+    document.getElementById('refreshBtn').textContent='Refresh rates';
+  });
+  // try auto-refresh but don't require it to work to see conversions via manual override
+  setInterval(async ()=>{
+    await fetchRates();
+    updateDisplays(document.getElementById('currency_select').value || 'EUR');
+  }, 60000);
+}
+
+init();
+</script>
+</body>
+</html>

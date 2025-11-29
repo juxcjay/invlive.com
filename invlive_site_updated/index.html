@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Invlive — Investment Plans</title>
+  <style>
+    :root{--accent:#0b6efd;--muted:#6b7280;--card:#ffffff;--bg:#f7f9fc;--container:1100px;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{margin:0;background:var(--bg);color:#0f172a;line-height:1.45}
+    .wrap{max-width:var(--container);margin:32px auto;padding:0 18px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+    .logo-box{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#0b6efd,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+    nav a{margin-left:14px;color:var(--muted);text-decoration:none;font-size:14px}
+    .hero{display:flex;gap:28px;align-items:center;margin-top:28px}
+    .hero-left{flex:1}
+    .hero h1{margin:0;font-size:28px}
+    .hero p{color:var(--muted);margin-top:8px}
+    .cta{margin-top:18px}
+    .btn{background:var(--accent);color:white;padding:10px 16px;border-radius:8px;border:none;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:22px}
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(12,12,30,0.06)}
+    .plan-title{display:flex;justify-content:space-between;align-items:center}
+    .plan-price{font-size:18px;font-weight:700}
+    .plan-list{margin:12px 0;color:var(--muted)}
+    .small{font-size:13px;color:var(--muted)}
+    .pay-methods{display:flex;gap:12px;flex-wrap:wrap}
+    .chip{background:#f1f5f9;padding:8px 10px;border-radius:8px;font-weight:600}
+    footer{margin:40px 0;padding:22px 0;border-top:1px solid #e6edf7;color:var(--muted)}
+    .two-col{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    @media(max-width:760px){.hero{flex-direction:column}.two-col{grid-template-columns:1fr}}
+    input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;margin-top:8px}
+    .tiny{font-size:12px;color:var(--muted)}
+    .copy-row{display:flex;gap:8px;align-items:center}
+    .footer-grid{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    a.link { color: var(--accent); text-decoration: none; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <a class="logo" href="https://invlive.com" target="_blank" rel="noopener noreferrer">
+          <div class="logo-box" aria-hidden="true">IV</div>
+          <div>
+            <div style="font-weight:700">invlive</div>
+            <div class="tiny">invlive.com · Secure · BTC-only</div>
+          </div>
+        </a>
+      </div>
+      <nav>
+        <a href="#plans">Plans</a>
+        <a href="#payments">Payments</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+    <section class="hero">
+      <div class="hero-left">
+        <h1>Invest with invlive — Bitcoin payments only</h1>
+        <p>Choose a plan, send BTC to the address or scan the QR code. All plan amounts are shown in Euros (€).</p>
+        <div class="cta">
+          <button class="btn" onclick="document.getElementById('plans').scrollIntoView()">View Plans</button>
+        </div>
+        <div style="margin-top:14px" class="small">Risk Notice: Investments carry risk. Read Terms & Conditions below.</div>
+      </div>
+      <div style="flex:0 0 360px" class="card">
+        <div style="font-weight:700">Quick Plan Validator</div>
+        <div style="margin-top:8px" class="small">Enter deposit amount and choose currency (display is €-based validation):</div>
+        <div style="margin-top:10px">
+          <input id="calc-amount" type="number" placeholder="Amount" value="2000" />
+          <select id="calc-currency" style="margin-top:8px">
+            <option value="EUR">EUR (€)</option>
+            <option value="USD">USD ($)</option>
+            <option value="NGN">NGN (₦)</option>
+            <option value="GBP">GBP (£)</option>
+          </select>
+          <select id="calc-plan" style="margin-top:8px">
+            <option value="Bronze">Bronze — €2,000 - €49,999</option>
+            <option value="Silver">Silver — €50,000 - €99,999</option>
+            <option value="Gold">Gold — €100,000+</option>
+          </select>
+          <button class="btn" style="margin-top:10px" onclick="validatePlan()">Check Plan</button>
+          <div id="plan-result" class="small" style="margin-top:10px">Plan validation result will appear here.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="plans" style="margin-top:28px">
+      <h2>Investment Plans (EUR)</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="plan-title">
+            <div><strong>Bronze</strong></div>
+            <div class="plan-price">€2,000 — €49,999</div>
+          </div>
+          <div class="plan-list">
+            <div>Minimum: €2,000</div>
+            <div>Maximum: €49,999</div>
+            <div>Return: Contact support for tailored rates</div>
+            <div>Support: Standard</div>
+          </div>
+          <div><button class="btn" onclick="startInvest('Bronze')">Select Bronze</button></div>
+        </div>
+        <div class="card">
+          <div class="plan-title">
+            <div><strong>Silver</strong></div>
+            <div class="plan-price">€50,000 — €99,999</div>
+          </div>
+          <div class="plan-list">
+            <div>Minimum: €50,000</div>
+            <div>Maximum: €99,999</div>
+            <div>Return: Contact support for tailored rates</div>
+            <div>Support: Priority</div>
+          </div>
+          <div><button class="btn" onclick="startInvest('Silver')">Select Silver</button></div>
+        </div>
+        <div class="card">
+          <div class="plan-title">
+            <div><strong>Gold</strong></div>
+            <div class="plan-price">€100,000+</div>
+          </div>
+          <div class="plan-list">
+            <div>Minimum: €100,000</div>
+            <div>Return: Custom institutional rates — contact support</div>
+            <div>Support: Dedicated manager</div>
+          </div>
+          <div><button class="btn" onclick="startInvest('Gold')">Select Gold</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="payments" style="margin-top:28px">
+      <h2>Payment Method — Bitcoin (BTC) Only</h2>
+      <div class="two-col" style="gap:18px;margin-top:12px">
+        <div>
+          <div class="card">
+            <h3>Bitcoin Payment</h3>
+            <div class="small" style="margin-top:8px">
+              Send Bitcoin to the address below (or scan the QR). Always confirm the address before sending.
+            </div>
+
+            <h4 style="margin-top:12px">BTC address</h4>
+            <div class="small">
+              <div class="copy-row" style="margin-top:6px">
+                <input id="btc_addr" value="3JSBrUPnaY5xRR6RUFqcwfMbQm5J4hvvdQ" readonly />
+                <button onclick="copyText('btc_addr')" class="btn" style="padding:8px">Copy</button>
+              </div>
+            </div>
+
+            <h4 style="margin-top:12px">Scan QR to pay</h4>
+            <div style="margin-top:8px;text-align:center">
+              <img src="btc_qr.jpg" alt="BTC QR" style="max-width:260px;border-radius:8px;border:1px solid #e6eef8"/>
+              <div class="tiny" style="margin-top:8px">If your wallet supports URIs, it will pre-fill the address. URI used: <code>bitcoin:3JSBrUPnaY5xRR6RUFqcwfMbQm5J4hvvdQ</code></div>
+            </div>
+
+            <h4 style="margin-top:12px">After payment</h4>
+            <div class="small">Send a screenshot of the transaction to <a class="link" href="mailto:Invlive81@gmail.com">Invlive81@gmail.com</a> with your plan name and amount. Confirmations depend on network speed (usually 1–6 confirmations).</div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>How to deposit (example)</h3>
+            <ol style="padding-left:18px;color:var(--muted)">
+              <li>Choose a plan and click the button to pre-fill contact form.</li>
+              <li>Send the exact BTC amount to the address or scan the QR code.</li>
+              <li>Send proof (screenshot and TXID) to Invlive81@gmail.com with your full name and plan.</li>
+              <li>Once payment is confirmed on-chain, we activate your plan.</li>
+            </ol>
+          </div>
+        </div>
+
+        <aside>
+          <div class="card">
+            <h4>Minimum/Maximum (EUR)</h4>
+            <div class="small">Bronze: €2,000 — €49,999<br/>Silver: €50,000 — €99,999<br/>Gold: €100,000+</div>
+            <h4 style="margin-top:12px">Fees</h4>
+            <div class="small">Network fees apply and are paid by the sender. Exchange/conversion fees may apply if you buy BTC to pay.</div>
+            <h4 style="margin-top:12px">Support</h4>
+            <div class="small">Email: <a class="link" href="mailto:Invlive81@gmail.com">Invlive81@gmail.com</a></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="faq" style="margin-top:28px">
+      <h2>FAQ</h2>
+      <div class="grid">
+        <div class="card">
+          <strong>How long to activate my plan?</strong>
+          <div class="small" style="margin-top:8px">After your BTC transaction is confirmed and you send proof, activation is typically within 24 business hours.</div>
+        </div>
+        <div class="card">
+          <strong>What if I send the wrong amount?</strong>
+          <div class="small" style="margin-top:8px">Contact support immediately at <a class="link" href="mailto:Invlive81@gmail.com">Invlive81@gmail.com</a>. Recovery depends on blockchain details — we cannot guarantee recovery of incorrect payments.</div>
+        </div>
+        <div class="card">
+          <strong>Is this insured?</strong>
+          <div class="small" style="margin-top:8px">No — investments carry market and operational risk. Only invest what you can afford to lose.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" style="margin-top:28px">
+      <h2>Contact & Start Investment</h2>
+      <div class="card">
+        <form onsubmit="handleForm(event)">
+          <label>Your name</label>
+          <input id="name" required placeholder="Full name" />
+          <label>Email</label>
+          <input id="email" type="email" required placeholder="you@example.com" />
+          <label>Plan</label>
+          <select id="plan_select">
+            <option>Bronze</option><option>Silver</option><option>Gold</option>
+          </select>
+          <label>Amount</label>
+          <input id="amount" type="number" value="2000" required />
+          <label>Currency</label>
+          <select id="currency">
+            <option value="EUR">EUR (€)</option>
+            <option value="USD">USD ($)</option>
+            <option value="NGN">NGN (₦)</option>
+            <option value="GBP">GBP (£)</option>
+          </select>
+          <button class="btn" style="margin-top:10px">Request Payment Instructions</button>
+          <div class="tiny" style="margin-top:10px">We'll email payment steps once you submit. (This demo form uses mailto fallback.)</div>
+        </form>
+      </div>
+    </section>
+
+    <section style="margin-top:28px">
+      <h2>Terms & Conditions — Risk Notice</h2>
+      <div class="card small">
+        <p><strong>Important:</strong> Investments are subject to risk. Past performance is not indicative of future results. invlive uses third-party processors and on-chain Bitcoin — you must verify addresses before sending. By investing you agree to our Terms & Conditions and acknowledge the risk of loss. Contact Invlive81@gmail.com for support.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-grid">
+        <div>
+          © <span id="year"></span> invlive. All rights reserved.
+        </div>
+        <div>
+          <a href="#terms" class="tiny">Terms</a> · <a href="#privacy" class="tiny">Privacy</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    function copyText(id){const el=document.getElementById(id);el.select?el.select():null;navigator.clipboard?.writeText(el.value).then(()=>{alert('Copied: '+el.value)}).catch(()=>{prompt('Copy this address',el.value)})}
+    function startInvest(plan){const amount=plan==='Bronze'?2000:plan==='Silver'?50000:100000;location.href='#contact';document.getElementById('plan_select').value=plan;document.getElementById('amount').value=amount;window.scrollTo({top:document.getElementById('contact').offsetTop-20,behavior:'smooth'})}
+    function validatePlan(){const amt=Number(document.getElementById('calc-amount').value)||0;const plan=document.getElementById('calc-plan').value;let ok=false;if(plan==='Bronze'&&amt>=2000&&amt<=49999)ok=true; if(plan==='Silver'&&amt>=50000&&amt<=99999)ok=true; if(plan==='Gold'&&amt>=100000)ok=true; document.getElementById('plan-result').innerHTML=ok?'<strong>Valid for '+plan+'</strong> — proceed to payment.':'<strong>Amount not valid for '+plan+'</strong>. Check minimum/maximum for that plan.'}
+    function handleForm(e){e.preventDefault();const name=document.getElementById('name').value;const email=document.getElementById('email').value;const plan=document.getElementById('plan_select').value;const amount=document.getElementById('amount').value;const currency=document.getElementById('currency').value;const subject=encodeURIComponent('Payment instructions request: '+plan+' - '+name);const body=encodeURIComponent('Name: '+name+'\nEmail: '+email+'\nPlan: '+plan+'\nAmount: '+amount+' '+currency+'\n\nPlease send payment instructions to proceed.');window.location.href='mailto:Invlive81@gmail.com?subject='+subject+'&body='+body}
+  </script>
+</body>
+</html>
